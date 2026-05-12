@@ -25,6 +25,7 @@
 static unsigned discover_network_call_count = 0;
 static unsigned connect_call_count          = 0;
 static unsigned disconnect_call_count       = 0;
+static sl_status_t disconnect_status        = SL_STATUS_OK;
 static zigpc_config_t test_config;
 static const char *connected_instance = NULL;
 
@@ -53,7 +54,7 @@ static sl_status_t test_connect_callback(const char *cpc_instance)
 static sl_status_t test_disconnect_callback(void)
 {
   disconnect_call_count++;
-  return SL_STATUS_OK;
+  return disconnect_status;
 }
 
 void suiteSetUp(void)
@@ -85,10 +86,14 @@ void setUp(void)
   discover_network_call_count = 0;
   connect_call_count = 0;
   disconnect_call_count = 0;
+  disconnect_status = SL_STATUS_OK;
   connected_instance = NULL;
 }
 
-void tearDown(void) {}
+void tearDown(void)
+{
+  zigpc_config_mock_Verify();
+}
 
 void test_zigpc_discovery_run_full_interview_without_registered_discovery_is_not_available(
   void)
@@ -117,6 +122,12 @@ void test_zigpc_discovery_init_with_registered_interface_without_discovery_is_in
   TEST_ASSERT_EQUAL(SL_STATUS_OK, zigpc_ncp_fixt_setup());
 
   TEST_ASSERT_EQUAL(SL_STATUS_INVALID_STATE, zigpc_discovery_init());
+  TEST_ASSERT_EQUAL_UINT(1, disconnect_call_count);
+  TEST_ASSERT_EQUAL(SL_STATUS_NOT_AVAILABLE,
+                    zigpc_ncp_notify_endpoint_interviewed("zb-0001",
+                                                         3,
+                                                         true,
+                                                         false));
   TEST_ASSERT_EQUAL(0, zigpc_ncp_fixt_teardown());
   TEST_ASSERT_EQUAL_UINT(1, disconnect_call_count);
 }
@@ -137,8 +148,41 @@ void test_zigpc_discovery_init_with_registered_interface_and_not_available_backe
 
   TEST_ASSERT_EQUAL(SL_STATUS_NOT_AVAILABLE, zigpc_discovery_init());
   TEST_ASSERT_EQUAL_UINT(1, discover_network_call_count);
+  TEST_ASSERT_EQUAL_UINT(1, disconnect_call_count);
+  TEST_ASSERT_EQUAL(SL_STATUS_NOT_AVAILABLE,
+                    zigpc_ncp_notify_endpoint_interviewed("zb-0001",
+                                                         3,
+                                                         true,
+                                                         false));
   TEST_ASSERT_EQUAL(0, zigpc_ncp_fixt_teardown());
   TEST_ASSERT_EQUAL_UINT(1, disconnect_call_count);
+}
+
+void test_zigpc_discovery_init_returns_fail_if_backend_disconnect_cleanup_fails(
+  void)
+{
+  zigpc_ncp_interface_t interface = {
+    .connect = test_connect_callback,
+    .disconnect = test_disconnect_callback,
+  };
+
+  TEST_ASSERT_EQUAL(SL_STATUS_OK, zigpc_ncp_set_interface(&interface));
+  TEST_ASSERT_EQUAL(SL_STATUS_OK, zigpc_discovery_setup());
+  zigpc_get_config_ExpectAndReturn(&test_config);
+  TEST_ASSERT_EQUAL(SL_STATUS_OK, zigpc_ncp_fixt_setup());
+
+  disconnect_status = SL_STATUS_FAIL;
+  TEST_ASSERT_EQUAL(SL_STATUS_FAIL, zigpc_discovery_init());
+  TEST_ASSERT_EQUAL_UINT(1, disconnect_call_count);
+  TEST_ASSERT_EQUAL(SL_STATUS_NOT_AVAILABLE,
+                    zigpc_ncp_notify_endpoint_interviewed("zb-0001",
+                                                         3,
+                                                         true,
+                                                         false));
+
+  disconnect_status = SL_STATUS_OK;
+  TEST_ASSERT_EQUAL(0, zigpc_ncp_fixt_teardown());
+  TEST_ASSERT_EQUAL_UINT(2, disconnect_call_count);
 }
 
 void test_zigpc_discovery_setup_before_connect_preserves_connect_and_full_interview_notifications(

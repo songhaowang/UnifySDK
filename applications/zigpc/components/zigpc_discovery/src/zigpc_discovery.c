@@ -15,6 +15,7 @@
 
 #include "zigpc_attrmgmt.h"
 #include "zigpc_ncp.h"
+#include "zigpc_ncp_fixt.h"
 
 sl_status_t zigpc_discovery_setup(void)
 {
@@ -25,21 +26,26 @@ sl_status_t zigpc_discovery_setup(void)
 sl_status_t zigpc_discovery_init(void)
 {
   const zigpc_ncp_interface_t *interface = zigpc_ncp_get_interface();
-  sl_status_t status = zigpc_discovery_setup();
-
-  if (status != SL_STATUS_OK) {
-    return status;
-  }
+  sl_status_t status = SL_STATUS_OK;
 
   if (interface == NULL) {
     return SL_STATUS_OK;
   }
 
   if (interface->discover_network == NULL) {
-    return SL_STATUS_INVALID_STATE;
+    status = SL_STATUS_INVALID_STATE;
+  } else {
+    status = zigpc_discovery_run_full_interview();
   }
 
-  return zigpc_discovery_run_full_interview();
+  if (status != SL_STATUS_OK) {
+    zigpc_ncp_register_endpoint_interview_callback(NULL);
+    if (zigpc_ncp_fixt_teardown() != 0) {
+      return SL_STATUS_FAIL;
+    }
+  }
+
+  return status;
 }
 
 int zigpc_discovery_teardown(void)
