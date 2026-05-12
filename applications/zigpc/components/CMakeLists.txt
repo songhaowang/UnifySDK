@@ -1,2 +1,3 @@
 
 add_subdirectory(zigpc_config)
+add_subdirectory(zigpc_datastore)
