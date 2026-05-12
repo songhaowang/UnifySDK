@@ -25,6 +25,7 @@
 static zigpc_ncp_interface_t zigpc_ncp_interface;
 static bool zigpc_ncp_interface_registered = false;
 static bool zigpc_ncp_connected            = false;
+static zigpc_ncp_endpoint_interview_callback_t endpoint_interview_callback = NULL;
 
 sl_status_t zigpc_ncp_set_interface(const zigpc_ncp_interface_t *interface)
 {
@@ -54,6 +55,29 @@ sl_status_t zigpc_ncp_set_interface(const zigpc_ncp_interface_t *interface)
 const zigpc_ncp_interface_t *zigpc_ncp_get_interface(void)
 {
   return zigpc_ncp_interface_registered ? &zigpc_ncp_interface : NULL;
+}
+
+sl_status_t zigpc_ncp_register_endpoint_interview_callback(
+  zigpc_ncp_endpoint_interview_callback_t callback)
+{
+  endpoint_interview_callback = callback;
+  return SL_STATUS_OK;
+}
+
+sl_status_t zigpc_ncp_notify_endpoint_interviewed(
+  const char *unid,
+  dotdot_endpoint_id_t endpoint_id,
+  bool supports_on_off,
+  bool supports_level)
+{
+  if (endpoint_interview_callback == NULL) {
+    return SL_STATUS_NOT_AVAILABLE;
+  }
+
+  return endpoint_interview_callback(unid,
+                                     endpoint_id,
+                                     supports_on_off,
+                                     supports_level);
 }
 
 sl_status_t zigpc_ncp_fixt_setup(void)

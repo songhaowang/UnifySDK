@@ -7,6 +7,7 @@
 #include "zigpc_datastore_fixt.h"
 #include "zigpc_attrmgmt.h"
 #include "zigpc_config_fixt.h"
+#include "zigpc_discovery.h"
 #include "zigpc_ncp_fixt.h"
 
 #include <stdlib.h>
@@ -19,6 +20,7 @@ static uic_fixt_setup_step_t uic_fixt_setup_steps_list[]
      {&uic_mqtt_dotdot_init, "DotDot MQTT"},
      {&zigpc_attrmgmt_init, "ZigPC Attribute Management"},
      {&zigpc_ncp_fixt_setup, "ZigPC NCP"},
+     {&zigpc_discovery_init, "ZigPC Discovery"},
      {NULL, "Terminator"}};
 
 static uic_fixt_shutdown_step_t uic_fixt_shutdown_steps_list[]

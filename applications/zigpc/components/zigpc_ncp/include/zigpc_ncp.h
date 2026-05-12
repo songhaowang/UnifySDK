@@ -24,6 +24,7 @@
 #define ZIGPC_NCP_H
 
 #include "sl_status.h"
+#include "uic_typedefs.h"
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -31,6 +32,12 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+typedef sl_status_t (*zigpc_ncp_endpoint_interview_callback_t)(
+  const char *unid,
+  dotdot_endpoint_id_t endpoint_id,
+  bool supports_on_off,
+  bool supports_level);
 
 typedef struct {
   sl_status_t (*connect)(const char *cpc_instance);
@@ -57,6 +64,26 @@ sl_status_t zigpc_ncp_set_interface(const zigpc_ncp_interface_t *interface);
  *         configured.
  */
 const zigpc_ncp_interface_t *zigpc_ncp_get_interface(void);
+
+/**
+ * @brief Register a callback for discovered endpoint interview results.
+ *
+ * Passing NULL clears the registered callback.
+ */
+sl_status_t zigpc_ncp_register_endpoint_interview_callback(
+  zigpc_ncp_endpoint_interview_callback_t callback);
+
+/**
+ * @brief Notify the registered callback about an interviewed endpoint.
+ *
+ * @return SL_STATUS_NOT_AVAILABLE if no callback is registered, otherwise the
+ *         callback return status.
+ */
+sl_status_t zigpc_ncp_notify_endpoint_interviewed(
+  const char *unid,
+  dotdot_endpoint_id_t endpoint_id,
+  bool supports_on_off,
+  bool supports_level);
 
 #ifdef __cplusplus
 }

@@ -2,7 +2,8 @@ add_subdirectory(components)
 
 add_executable(zigpc main.c)
 target_link_libraries(zigpc
-  PUBLIC unify zigpc_config zigpc_datastore zigpc_attrmgmt zigpc_ncp)
+  PUBLIC unify zigpc_config zigpc_datastore zigpc_attrmgmt zigpc_discovery
+         zigpc_ncp)
 
 target_compile_definitions(
   zigpc PRIVATE CMAKE_INSTALL_PREFIX="${CMAKE_INSTALL_PREFIX}"
