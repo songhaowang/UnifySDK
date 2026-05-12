@@ -44,8 +44,11 @@ typedef struct {
  * @brief Set the active ZigPC NCP interface.
  *
  * Passing NULL clears the configured interface.
+ *
+ * @return SL_STATUS_OK on success, or the disconnect error when replacing or
+ *         clearing an active interface fails.
  */
-void zigpc_ncp_set_interface(const zigpc_ncp_interface_t *interface);
+sl_status_t zigpc_ncp_set_interface(const zigpc_ncp_interface_t *interface);
 
 /**
  * @brief Get the active ZigPC NCP interface.

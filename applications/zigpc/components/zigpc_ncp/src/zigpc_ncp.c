@@ -26,11 +26,17 @@ static zigpc_ncp_interface_t zigpc_ncp_interface;
 static bool zigpc_ncp_interface_registered = false;
 static bool zigpc_ncp_connected            = false;
 
-void zigpc_ncp_set_interface(const zigpc_ncp_interface_t *interface)
+sl_status_t zigpc_ncp_set_interface(const zigpc_ncp_interface_t *interface)
 {
-  if (zigpc_ncp_connected && zigpc_ncp_interface_registered
-      && (zigpc_ncp_interface.disconnect != NULL)) {
-    (void) zigpc_ncp_interface.disconnect();
+  if (zigpc_ncp_connected && zigpc_ncp_interface_registered) {
+    if (zigpc_ncp_interface.disconnect == NULL) {
+      return SL_STATUS_INVALID_STATE;
+    }
+
+    sl_status_t status = zigpc_ncp_interface.disconnect();
+    if (status != SL_STATUS_OK) {
+      return status;
+    }
     zigpc_ncp_connected = false;
   }
 
@@ -41,6 +47,8 @@ void zigpc_ncp_set_interface(const zigpc_ncp_interface_t *interface)
     zigpc_ncp_interface = *interface;
     zigpc_ncp_interface_registered = true;
   }
+
+  return SL_STATUS_OK;
 }
 
 const zigpc_ncp_interface_t *zigpc_ncp_get_interface(void)
