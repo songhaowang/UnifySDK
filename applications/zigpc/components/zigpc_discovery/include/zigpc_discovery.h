@@ -23,7 +23,11 @@
 extern "C" {
 #endif
 
+sl_status_t zigpc_discovery_setup(void);
+
 sl_status_t zigpc_discovery_init(void);
+
+int zigpc_discovery_teardown(void);
 
 sl_status_t zigpc_discovery_run_full_interview(void);
 

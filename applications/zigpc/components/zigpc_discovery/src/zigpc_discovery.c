@@ -16,11 +16,15 @@
 #include "zigpc_attrmgmt.h"
 #include "zigpc_ncp.h"
 
+sl_status_t zigpc_discovery_setup(void)
+{
+  return zigpc_ncp_register_endpoint_interview_callback(
+    zigpc_discovery_handle_endpoint);
+}
+
 sl_status_t zigpc_discovery_init(void)
 {
-  sl_status_t status
-    = zigpc_ncp_register_endpoint_interview_callback(
-      zigpc_discovery_handle_endpoint);
+  sl_status_t status = zigpc_discovery_setup();
 
   if (status != SL_STATUS_OK) {
     return status;
@@ -28,7 +32,18 @@ sl_status_t zigpc_discovery_init(void)
 
   status = zigpc_discovery_run_full_interview();
 
-  return (status == SL_STATUS_NOT_AVAILABLE) ? SL_STATUS_OK : status;
+  if (status != SL_STATUS_NOT_AVAILABLE) {
+    return status;
+  }
+
+  return (zigpc_ncp_get_interface() == NULL) ? SL_STATUS_OK : status;
+}
+
+int zigpc_discovery_teardown(void)
+{
+  return (zigpc_ncp_register_endpoint_interview_callback(NULL) == SL_STATUS_OK)
+           ? 0
+           : -1;
 }
 
 sl_status_t zigpc_discovery_run_full_interview(void)
