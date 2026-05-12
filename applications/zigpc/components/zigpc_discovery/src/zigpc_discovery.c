@@ -24,6 +24,7 @@ sl_status_t zigpc_discovery_setup(void)
 
 sl_status_t zigpc_discovery_init(void)
 {
+  const zigpc_ncp_interface_t *interface = zigpc_ncp_get_interface();
   sl_status_t status = zigpc_discovery_setup();
 
   if (status != SL_STATUS_OK) {
@@ -36,7 +37,7 @@ sl_status_t zigpc_discovery_init(void)
     return status;
   }
 
-  return (zigpc_ncp_get_interface() == NULL) ? SL_STATUS_OK : status;
+  return (interface == NULL) ? SL_STATUS_OK : SL_STATUS_INVALID_STATE;
 }
 
 int zigpc_discovery_teardown(void)

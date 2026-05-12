@@ -96,7 +96,7 @@ void test_zigpc_discovery_init_without_registered_discovery_is_ok(void)
   TEST_ASSERT_EQUAL(SL_STATUS_OK, zigpc_discovery_init());
 }
 
-void test_zigpc_discovery_init_with_registered_interface_without_discovery_is_not_available(
+void test_zigpc_discovery_init_with_registered_interface_without_discovery_is_invalid_state(
   void)
 {
   zigpc_ncp_interface_t interface = {
@@ -109,7 +109,7 @@ void test_zigpc_discovery_init_with_registered_interface_without_discovery_is_no
   zigpc_get_config_ExpectAndReturn(&test_config);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, zigpc_ncp_fixt_setup());
 
-  TEST_ASSERT_EQUAL(SL_STATUS_NOT_AVAILABLE, zigpc_discovery_init());
+  TEST_ASSERT_EQUAL(SL_STATUS_INVALID_STATE, zigpc_discovery_init());
   TEST_ASSERT_EQUAL(0, zigpc_ncp_fixt_teardown());
   TEST_ASSERT_EQUAL_UINT(1, disconnect_call_count);
 }
