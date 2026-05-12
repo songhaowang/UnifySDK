@@ -10,4 +10,4 @@ target_compile_definitions(
 install(TARGETS zigpc RUNTIME DESTINATION bin COMPONENT uic-zigpc)
 
 add_component_to_uic(uic-zigpc "Universal IOT controller - ZigBee Protocol Controller"
-                     "uic-zigpc" "" "" "")
+                     "uic-zigpc" "libunify" "" "")
