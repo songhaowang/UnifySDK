@@ -31,13 +31,15 @@ sl_status_t zigpc_discovery_init(void)
     return status;
   }
 
-  status = zigpc_discovery_run_full_interview();
-
-  if (status != SL_STATUS_NOT_AVAILABLE) {
-    return status;
+  if (interface == NULL) {
+    return SL_STATUS_OK;
   }
 
-  return (interface == NULL) ? SL_STATUS_OK : SL_STATUS_INVALID_STATE;
+  if (interface->discover_network == NULL) {
+    return SL_STATUS_INVALID_STATE;
+  }
+
+  return zigpc_discovery_run_full_interview();
 }
 
 int zigpc_discovery_teardown(void)
