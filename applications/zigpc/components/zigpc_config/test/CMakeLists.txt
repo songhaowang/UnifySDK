@@ -1,1 +1,1 @@
-target_add_unittest(zigpc_config SOURCES zigpc_config_test.c)
+target_add_unittest(zigpc_config SOURCES zigpc_config_test.c DEPENDS uic_config_mock)

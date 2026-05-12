@@ -5,74 +5,98 @@
 // Test includes
 #include "unity.h"
 
-// Unify library
-#include "config.h"
+// CMocks
+#include "config_mock.h"
 
-// Generic includes
-#include <stdbool.h>
-#include <stdio.h>
-#include <unistd.h>
+static const char *test_datastore_file = "zigpc-test.db";
+static const char *test_cpc_instance   = "cpcd_0";
+static const char *test_mqtt_host      = "localhost";
+static const int test_mqtt_port        = 2000;
 
-#define TEST_CONFIG_FILE "_test_config.ini"
-
-static void remove_test_config_file()
+void suiteSetUp()
 {
-  if (access(TEST_CONFIG_FILE, F_OK) != -1) {
-    remove(TEST_CONFIG_FILE);
-  }
+  config_mock_Init();
 }
 
-void setUp()
+int suiteTearDown(int num_failures)
 {
-  remove_test_config_file();
-  config_reset();
+  config_mock_Destroy();
+  return num_failures;
 }
 
-void tearDown()
+void setUp() {}
+
+void tearDown() {}
+
+void test_zigpc_config_init_registers_string_cpc_instance()
 {
-  remove_test_config_file();
+  config_add_string_ExpectAndReturn(CONFIG_KEY_ZIGPC_DATASTORE_FILE,
+                                    "ZigPC datastore database file",
+                                    DEFAULT_ZIGPC_DATASTORE_FILE,
+                                    CONFIG_STATUS_OK);
+  config_add_string_ExpectAndReturn(CONFIG_KEY_ZIGPC_CPC_INSTANCE,
+                                    "ZigPC CPC instance",
+                                    DEFAULT_ZIGPC_CPC_INSTANCE,
+                                    CONFIG_STATUS_OK);
+
+  TEST_ASSERT_EQUAL(0, zigpc_config_init());
 }
 
-static bool create_file_with_content(const char *filename, const char *content)
+void test_zigpc_config_fixture_populates_string_cpc_instance()
 {
-  FILE *fpth = fopen(filename, "w");
-  if (fpth == NULL) {
-    return false;
-  }
+  config_get_as_string_ExpectAndReturn(CONFIG_KEY_ZIGPC_DATASTORE_FILE,
+                                       0,
+                                       CONFIG_STATUS_OK);
+  config_get_as_string_IgnoreArg_result();
+  config_get_as_string_ReturnThruPtr_result(&test_datastore_file);
 
-  const int result = fputs(content, fpth);
-  fclose(fpth);
+  config_get_as_string_ExpectAndReturn(CONFIG_KEY_ZIGPC_CPC_INSTANCE,
+                                       0,
+                                       CONFIG_STATUS_OK);
+  config_get_as_string_IgnoreArg_result();
+  config_get_as_string_ReturnThruPtr_result(&test_cpc_instance);
 
-  return (result > 0);
+  config_get_as_string_ExpectAndReturn(CONFIG_KEY_MQTT_HOST,
+                                       0,
+                                       CONFIG_STATUS_OK);
+  config_get_as_string_IgnoreArg_result();
+  config_get_as_string_ReturnThruPtr_result(&test_mqtt_host);
+
+  config_get_as_int_ExpectAndReturn(CONFIG_KEY_MQTT_PORT, 0, CONFIG_STATUS_OK);
+  config_get_as_int_IgnoreArg_result();
+  config_get_as_int_ReturnThruPtr_result((int *)&test_mqtt_port);
+
+  TEST_ASSERT_EQUAL(SL_STATUS_OK, zigpc_config_fixt_setup());
+  TEST_ASSERT_EQUAL_STRING(test_datastore_file, zigpc_get_config()->datastore_file);
+  TEST_ASSERT_EQUAL_STRING(test_cpc_instance, zigpc_get_config()->cpc_instance);
+  TEST_ASSERT_EQUAL_STRING(test_mqtt_host, zigpc_get_config()->mqtt_host);
+  TEST_ASSERT_EQUAL(test_mqtt_port, zigpc_get_config()->mqtt_port);
 }
 
-void test_config_from_file_populates_datastore_and_cpc_instance()
+void test_zigpc_config_fixture_fails_when_mqtt_port_read_fails()
 {
-  char *argv_inject[3]    = {"zigpc_config_test", "--conf", TEST_CONFIG_FILE};
-  const char *ini_content = "zigpc:\n"
-                            "    datastore_file: zigpc-test.db\n"
-                            "    cpc_instance: 12\n"
-                            "mqtt:\n"
-                            "    host: localhost\n"
-                            "    port: 2000\n";
+  config_get_as_string_ExpectAndReturn(CONFIG_KEY_ZIGPC_DATASTORE_FILE,
+                                       0,
+                                       CONFIG_STATUS_OK);
+  config_get_as_string_IgnoreArg_result();
+  config_get_as_string_ReturnThruPtr_result(&test_datastore_file);
 
-  TEST_ASSERT_TRUE_MESSAGE(
-    create_file_with_content(TEST_CONFIG_FILE, ini_content),
-    "Failed to create config file");
-  TEST_ASSERT_EQUAL_MESSAGE(0,
-                            zigpc_config_init(),
-                            "zigpc_config_init failed");
-  TEST_ASSERT_EQUAL_MESSAGE(CONFIG_STATUS_OK,
-                            config_parse(sizeof(argv_inject) / sizeof(char *),
-                                         argv_inject,
-                                         "test version"),
-                            "config_parse failed");
-  TEST_ASSERT_EQUAL_MESSAGE(SL_STATUS_OK,
-                            zigpc_config_fixt_setup(),
-                            "zigpc_config_fixt_setup failed");
+  config_get_as_string_ExpectAndReturn(CONFIG_KEY_ZIGPC_CPC_INSTANCE,
+                                       0,
+                                       CONFIG_STATUS_OK);
+  config_get_as_string_IgnoreArg_result();
+  config_get_as_string_ReturnThruPtr_result(&test_cpc_instance);
 
-  TEST_ASSERT_EQUAL_STRING("zigpc-test.db", zigpc_get_config()->datastore_file);
-  TEST_ASSERT_EQUAL(12, zigpc_get_config()->cpc_instance);
-  TEST_ASSERT_EQUAL_STRING("localhost", zigpc_get_config()->mqtt_host);
-  TEST_ASSERT_EQUAL(2000, zigpc_get_config()->mqtt_port);
+  config_get_as_string_ExpectAndReturn(CONFIG_KEY_MQTT_HOST,
+                                       0,
+                                       CONFIG_STATUS_OK);
+  config_get_as_string_IgnoreArg_result();
+  config_get_as_string_ReturnThruPtr_result(&test_mqtt_host);
+
+  config_get_as_int_ExpectAndReturn(CONFIG_KEY_MQTT_PORT,
+                                    0,
+                                    CONFIG_STATUS_INVALID_TYPE);
+  config_get_as_int_IgnoreArg_result();
+
+  TEST_ASSERT_EQUAL(SL_STATUS_FAIL, zigpc_config_fixt_setup());
 }

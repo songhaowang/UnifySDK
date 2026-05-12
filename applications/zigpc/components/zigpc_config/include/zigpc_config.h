@@ -36,7 +36,7 @@
 #define DEFAULT_ZIGPC_DATASTORE_FILE UIC_VAR_DIR "/zigpc.db"
 
 // Default setting for the zigpc.cpc_instance.
-#define DEFAULT_ZIGPC_CPC_INSTANCE 0
+#define DEFAULT_ZIGPC_CPC_INSTANCE "cpcd_0"
 
 // Config key for the ZigPC datastore file
 #define CONFIG_KEY_ZIGPC_DATASTORE_FILE "zigpc.datastore_file"
@@ -52,7 +52,7 @@ typedef struct {
   /// File name for datastore/persistent storage
   const char *datastore_file;
   /// CPC instance to connect ZigPC against
-  int cpc_instance;
+  const char *cpc_instance;
   /// Hostname of the MQTT broker
   const char *mqtt_host;
   /// Port of the MQTT broker

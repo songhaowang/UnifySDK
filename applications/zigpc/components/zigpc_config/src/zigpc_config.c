@@ -25,15 +25,15 @@
 
 static zigpc_config_t config;
 
-static int config_get_int_safe(const char *key)
+static config_status_t config_get_int_and_log(const char *key, int *value)
 {
-  int value = 0;
+  config_status_t status = config_get_as_int(key, value);
 
-  if (SL_STATUS_OK != config_get_as_int(key, &value)) {
+  if (CONFIG_STATUS_OK != status) {
     sl_log_error(LOG_TAG, "Failed to get int for key: %s", key);
   }
 
-  return value;
+  return status;
 }
 
 int zigpc_config_init(void)
@@ -43,9 +43,9 @@ int zigpc_config_init(void)
   status |= config_add_string(CONFIG_KEY_ZIGPC_DATASTORE_FILE,
                               "ZigPC datastore database file",
                               DEFAULT_ZIGPC_DATASTORE_FILE);
-  status |= config_add_int(CONFIG_KEY_ZIGPC_CPC_INSTANCE,
-                           "ZigPC CPC instance",
-                           DEFAULT_ZIGPC_CPC_INSTANCE);
+  status |= config_add_string(CONFIG_KEY_ZIGPC_CPC_INSTANCE,
+                              "ZigPC CPC instance",
+                              DEFAULT_ZIGPC_CPC_INSTANCE);
 
   return status != CONFIG_STATUS_OK;
 }
@@ -57,9 +57,10 @@ sl_status_t zigpc_config_fixt_setup(void)
 
   status |= config_get_as_string(CONFIG_KEY_ZIGPC_DATASTORE_FILE,
                                  &config.datastore_file);
-  config.cpc_instance = config_get_int_safe(CONFIG_KEY_ZIGPC_CPC_INSTANCE);
+  status |= config_get_as_string(CONFIG_KEY_ZIGPC_CPC_INSTANCE,
+                                 &config.cpc_instance);
   status |= config_get_as_string(CONFIG_KEY_MQTT_HOST, &config.mqtt_host);
-  config.mqtt_port = config_get_int_safe(CONFIG_KEY_MQTT_PORT);
+  status |= config_get_int_and_log(CONFIG_KEY_MQTT_PORT, &config.mqtt_port);
 
   return status == CONFIG_STATUS_OK ? SL_STATUS_OK : SL_STATUS_FAIL;
 }
