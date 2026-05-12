@@ -34,6 +34,7 @@ extern "C" {
 
 typedef struct {
   sl_status_t (*connect)(const char *cpc_instance);
+  sl_status_t (*disconnect)(void);
   sl_status_t (*discover_network)(void);
   sl_status_t (*send_on_off)(const char *unid, uint8_t endpoint_id, bool on_off);
   sl_status_t (*move_to_level)(const char *unid, uint8_t endpoint_id, uint8_t level);
@@ -48,6 +49,9 @@ void zigpc_ncp_set_interface(const zigpc_ncp_interface_t *interface);
 
 /**
  * @brief Get the active ZigPC NCP interface.
+ *
+ * @return Pointer to the registered interface, or NULL when no interface is
+ *         configured.
  */
 const zigpc_ncp_interface_t *zigpc_ncp_get_interface(void);
 

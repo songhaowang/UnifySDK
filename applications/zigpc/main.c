@@ -14,7 +14,8 @@ static uic_fixt_setup_step_t uic_fixt_setup_steps_list[]
      {NULL, "Terminator"}};
 
 static uic_fixt_shutdown_step_t uic_fixt_shutdown_steps_list[]
-  = {{&datastore_fixt_teardown, "Datastore"},
+  = {{&zigpc_ncp_fixt_teardown, "ZigPC NCP"},
+     {&datastore_fixt_teardown, "Datastore"},
      {NULL, "Terminator"}};
 
 int main(int argc, char **argv)

@@ -34,12 +34,25 @@ extern "C" {
 /**
  * @brief Fixture for setting up the zigpc_ncp component.
  *
- * This requires an NCP connect handler to be configured before setup.
+ * If no NCP interface is registered yet, setup is a no-op so ZigPC can start
+ * before a production backend is added. When an interface is registered it
+ * must provide both connect and disconnect lifecycle handlers.
  *
- * @return SL_STATUS_OK for success, SL_STATUS_INVALID_STATE when no connect
- *         handler is configured, or the connect handler status otherwise.
+ * @return SL_STATUS_OK for success, SL_STATUS_INVALID_STATE when a registered
+ *         interface is missing connect/disconnect handlers, or the connect
+ *         handler status otherwise.
  */
 sl_status_t zigpc_ncp_fixt_setup(void);
+
+/**
+ * @brief Fixture for tearing down the zigpc_ncp component.
+ *
+ * Teardown is a no-op when no NCP interface is registered or setup never
+ * completed a connection.
+ *
+ * @return int 0 for success, -1 for disconnect failure
+ */
+int zigpc_ncp_fixt_teardown(void);
 
 #ifdef __cplusplus
 }
