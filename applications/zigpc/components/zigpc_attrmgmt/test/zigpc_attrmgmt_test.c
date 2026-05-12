@@ -12,6 +12,7 @@
 #include "attribute_store_helper.h"
 #include "datastore.h"
 #include "unify_dotdot_attribute_store.h"
+#include "unify_dotdot_attribute_store_test.h"
 #include "unify_dotdot_defined_attribute_types.h"
 
 #include <string.h>
@@ -74,6 +75,9 @@ void test_zigpc_attrmgmt_publish_endpoint_creates_supported_cluster_attributes(
   const char *unid               = "zb-1234";
   dotdot_endpoint_id_t endpoint_id = 1;
 
+  TEST_ASSERT_FALSE(dotdot_is_supported_on_off_on_off(unid, endpoint_id));
+  TEST_ASSERT_FALSE(dotdot_is_supported_level_current_level(unid, endpoint_id));
+
   TEST_ASSERT_EQUAL(SL_STATUS_OK,
                     zigpc_attrmgmt_publish_endpoint(unid,
                                                     endpoint_id,
@@ -93,4 +97,7 @@ void test_zigpc_attrmgmt_publish_endpoint_creates_supported_cluster_attributes(
     attribute_store_get_first_child_by_type(
       endpoint_node,
       DOTDOT_ATTRIBUTE_ID_LEVEL_CURRENT_LEVEL));
+
+  TEST_ASSERT_TRUE(dotdot_is_supported_on_off_on_off(unid, endpoint_id));
+  TEST_ASSERT_TRUE(dotdot_is_supported_level_current_level(unid, endpoint_id));
 }
