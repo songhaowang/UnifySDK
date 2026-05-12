@@ -63,7 +63,8 @@ sl_status_t zigpc_discovery_run_full_interview(void)
 {
   const zigpc_ncp_interface_t *ncp_interface = zigpc_ncp_get_interface();
 
-  if ((ncp_interface == NULL) || (ncp_interface->discover_network == NULL)) {
+  if ((ncp_interface == NULL) || (ncp_interface->discover_network == NULL)
+      || (zigpc_ncp_is_connected() == false)) {
     return SL_STATUS_NOT_AVAILABLE;
   }
 

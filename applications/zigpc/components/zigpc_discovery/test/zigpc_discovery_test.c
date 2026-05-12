@@ -110,6 +110,20 @@ void test_zigpc_discovery_run_full_interview_without_registered_discovery_is_not
                     zigpc_discovery_run_full_interview());
 }
 
+void test_zigpc_discovery_run_full_interview_with_registered_but_unconnected_backend_is_not_available(
+  void)
+{
+  zigpc_ncp_interface_t interface = {
+    .discover_network = test_discover_network_callback,
+  };
+
+  TEST_ASSERT_EQUAL(SL_STATUS_OK, zigpc_ncp_set_interface(&interface));
+
+  TEST_ASSERT_EQUAL(SL_STATUS_NOT_AVAILABLE,
+                    zigpc_discovery_run_full_interview());
+  TEST_ASSERT_EQUAL_UINT(0, discover_network_call_count);
+}
+
 void test_zigpc_discovery_init_without_registered_discovery_is_ok(void)
 {
   TEST_ASSERT_EQUAL(SL_STATUS_OK, zigpc_discovery_setup());
