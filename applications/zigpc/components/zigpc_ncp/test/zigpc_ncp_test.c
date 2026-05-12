@@ -179,11 +179,11 @@ void test_zigpc_ncp_fixture_keeps_original_backend_when_replacement_disconnect_f
 {
   zigpc_ncp_interface_t interface = {
     .connect = test_connect,
-    .disconnect = test_disconnect,
+    .disconnect = test_disconnect_fail,
   };
   zigpc_ncp_interface_t replacement = {
     .connect = test_connect_alt,
-    .disconnect = test_disconnect_fail,
+    .disconnect = test_disconnect_alt,
   };
 
   test_config.cpc_instance = "cpcd_0";
