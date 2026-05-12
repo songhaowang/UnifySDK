@@ -101,3 +101,135 @@ void test_zigpc_attrmgmt_publish_endpoint_creates_supported_cluster_attributes(
   TEST_ASSERT_TRUE(dotdot_is_supported_on_off_on_off(unid, endpoint_id));
   TEST_ASSERT_TRUE(dotdot_is_supported_level_current_level(unid, endpoint_id));
 }
+
+void test_zigpc_attrmgmt_publish_endpoint_removes_stale_on_off_support(void)
+{
+  const char *unid               = "zb-5678";
+  dotdot_endpoint_id_t endpoint_id = 2;
+
+  TEST_ASSERT_EQUAL(SL_STATUS_OK,
+                    zigpc_attrmgmt_publish_endpoint(unid,
+                                                    endpoint_id,
+                                                    true,
+                                                    true));
+  TEST_ASSERT_TRUE(dotdot_is_supported_on_off_on_off(unid, endpoint_id));
+  TEST_ASSERT_TRUE(dotdot_is_supported_level_current_level(unid, endpoint_id));
+
+  TEST_ASSERT_EQUAL(SL_STATUS_OK,
+                    zigpc_attrmgmt_publish_endpoint(unid,
+                                                    endpoint_id,
+                                                    false,
+                                                    true));
+
+  attribute_store_node_t endpoint_node
+    = zigpc_attrmgmt_get_endpoint_node(unid, endpoint_id);
+
+  TEST_ASSERT_EQUAL(ATTRIBUTE_STORE_INVALID_NODE,
+                    attribute_store_get_first_child_by_type(
+                      endpoint_node,
+                      DOTDOT_ATTRIBUTE_ID_ON_OFF_ON_OFF));
+  TEST_ASSERT_NOT_EQUAL(ATTRIBUTE_STORE_INVALID_NODE,
+                        attribute_store_get_first_child_by_type(
+                          endpoint_node,
+                          DOTDOT_ATTRIBUTE_ID_LEVEL_CURRENT_LEVEL));
+  TEST_ASSERT_FALSE(dotdot_is_supported_on_off_on_off(unid, endpoint_id));
+  TEST_ASSERT_TRUE(dotdot_is_supported_level_current_level(unid, endpoint_id));
+}
+
+void test_zigpc_attrmgmt_publish_endpoint_removes_stale_level_support(void)
+{
+  const char *unid               = "zb-9abc";
+  dotdot_endpoint_id_t endpoint_id = 3;
+
+  TEST_ASSERT_EQUAL(SL_STATUS_OK,
+                    zigpc_attrmgmt_publish_endpoint(unid,
+                                                    endpoint_id,
+                                                    true,
+                                                    true));
+  TEST_ASSERT_TRUE(dotdot_is_supported_on_off_on_off(unid, endpoint_id));
+  TEST_ASSERT_TRUE(dotdot_is_supported_level_current_level(unid, endpoint_id));
+
+  TEST_ASSERT_EQUAL(SL_STATUS_OK,
+                    zigpc_attrmgmt_publish_endpoint(unid,
+                                                    endpoint_id,
+                                                    true,
+                                                    false));
+
+  attribute_store_node_t endpoint_node
+    = zigpc_attrmgmt_get_endpoint_node(unid, endpoint_id);
+
+  TEST_ASSERT_NOT_EQUAL(ATTRIBUTE_STORE_INVALID_NODE,
+                        attribute_store_get_first_child_by_type(
+                          endpoint_node,
+                          DOTDOT_ATTRIBUTE_ID_ON_OFF_ON_OFF));
+  TEST_ASSERT_EQUAL(ATTRIBUTE_STORE_INVALID_NODE,
+                    attribute_store_get_first_child_by_type(
+                      endpoint_node,
+                      DOTDOT_ATTRIBUTE_ID_LEVEL_CURRENT_LEVEL));
+  TEST_ASSERT_TRUE(dotdot_is_supported_on_off_on_off(unid, endpoint_id));
+  TEST_ASSERT_FALSE(dotdot_is_supported_level_current_level(unid, endpoint_id));
+}
+
+void test_zigpc_attrmgmt_publish_endpoint_removes_both_stale_supports(void)
+{
+  const char *unid               = "zb-def0";
+  dotdot_endpoint_id_t endpoint_id = 4;
+
+  TEST_ASSERT_EQUAL(SL_STATUS_OK,
+                    zigpc_attrmgmt_publish_endpoint(unid,
+                                                    endpoint_id,
+                                                    true,
+                                                    true));
+  TEST_ASSERT_EQUAL(SL_STATUS_OK,
+                    zigpc_attrmgmt_publish_endpoint(unid,
+                                                    endpoint_id,
+                                                    false,
+                                                    false));
+
+  attribute_store_node_t endpoint_node
+    = zigpc_attrmgmt_get_endpoint_node(unid, endpoint_id);
+
+  TEST_ASSERT_EQUAL(ATTRIBUTE_STORE_INVALID_NODE,
+                    attribute_store_get_first_child_by_type(
+                      endpoint_node,
+                      DOTDOT_ATTRIBUTE_ID_ON_OFF_ON_OFF));
+  TEST_ASSERT_EQUAL(ATTRIBUTE_STORE_INVALID_NODE,
+                    attribute_store_get_first_child_by_type(
+                      endpoint_node,
+                      DOTDOT_ATTRIBUTE_ID_LEVEL_CURRENT_LEVEL));
+  TEST_ASSERT_FALSE(dotdot_is_supported_on_off_on_off(unid, endpoint_id));
+  TEST_ASSERT_FALSE(dotdot_is_supported_level_current_level(unid, endpoint_id));
+}
+
+void test_zigpc_attrmgmt_publish_endpoint_without_supported_clusters_is_ok(void)
+{
+  const char *unid               = "zb-1111";
+  dotdot_endpoint_id_t endpoint_id = 5;
+
+  TEST_ASSERT_EQUAL(SL_STATUS_OK,
+                    zigpc_attrmgmt_publish_endpoint(unid,
+                                                    endpoint_id,
+                                                    false,
+                                                    false));
+
+  attribute_store_node_t endpoint_node
+    = zigpc_attrmgmt_get_endpoint_node(unid, endpoint_id);
+
+  TEST_ASSERT_NOT_EQUAL(ATTRIBUTE_STORE_INVALID_NODE, endpoint_node);
+  TEST_ASSERT_EQUAL(ATTRIBUTE_STORE_INVALID_NODE,
+                    attribute_store_get_first_child_by_type(
+                      endpoint_node,
+                      DOTDOT_ATTRIBUTE_ID_ON_OFF_ON_OFF));
+  TEST_ASSERT_EQUAL(ATTRIBUTE_STORE_INVALID_NODE,
+                    attribute_store_get_first_child_by_type(
+                      endpoint_node,
+                      DOTDOT_ATTRIBUTE_ID_LEVEL_CURRENT_LEVEL));
+  TEST_ASSERT_FALSE(dotdot_is_supported_on_off_on_off(unid, endpoint_id));
+  TEST_ASSERT_FALSE(dotdot_is_supported_level_current_level(unid, endpoint_id));
+}
+
+void test_zigpc_attrmgmt_publish_endpoint_with_null_unid_fails(void)
+{
+  TEST_ASSERT_EQUAL(SL_STATUS_FAIL,
+                    zigpc_attrmgmt_publish_endpoint(NULL, 1, true, false));
+}

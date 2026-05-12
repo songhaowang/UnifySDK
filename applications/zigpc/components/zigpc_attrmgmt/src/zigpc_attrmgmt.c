@@ -15,6 +15,7 @@
 #include "zigpc_attrmgmt_attribute_types.h"
 #include "zigpc_attrmgmt_helper.h"
 
+#include "attribute_store.h"
 #include "attribute_store_configuration.h"
 #include "attribute_store_helper.h"
 #include "attribute_store_type_registration.h"
@@ -51,6 +52,23 @@ static sl_status_t zigpc_attrmgmt_register_attribute_types(void)
   return status;
 }
 
+static sl_status_t zigpc_attrmgmt_reconcile_capability_node(
+  attribute_store_node_t endpoint_node,
+  attribute_store_type_t capability_type,
+  bool is_supported)
+{
+  if (is_supported) {
+    attribute_store_node_t capability_node
+      = attribute_store_create_child_if_missing(endpoint_node, capability_type);
+    return (capability_node == ATTRIBUTE_STORE_INVALID_NODE) ? SL_STATUS_FAIL
+                                                             : SL_STATUS_OK;
+  }
+
+  attribute_store_node_t capability_node
+    = attribute_store_get_first_child_by_type(endpoint_node, capability_type);
+  return attribute_store_delete_node(capability_node);
+}
+
 sl_status_t zigpc_attrmgmt_init(void)
 {
   sl_status_t status = zigpc_attrmgmt_register_attribute_types();
@@ -71,6 +89,8 @@ sl_status_t zigpc_attrmgmt_publish_endpoint(const char *unid,
                                             bool supports_on_off,
                                             bool supports_level)
 {
+  sl_status_t status = SL_STATUS_OK;
+
   if (unid == NULL) {
     return SL_STATUS_FAIL;
   }
@@ -82,23 +102,20 @@ sl_status_t zigpc_attrmgmt_publish_endpoint(const char *unid,
     return SL_STATUS_FAIL;
   }
 
-  if (supports_on_off) {
-    attribute_store_node_t on_off_node
-      = attribute_store_create_child_if_missing(endpoint_node,
-                                                DOTDOT_ATTRIBUTE_ID_ON_OFF_ON_OFF);
-    if (on_off_node == ATTRIBUTE_STORE_INVALID_NODE) {
-      return SL_STATUS_FAIL;
-    }
+  if (zigpc_attrmgmt_reconcile_capability_node(endpoint_node,
+                                               DOTDOT_ATTRIBUTE_ID_ON_OFF_ON_OFF,
+                                               supports_on_off)
+      != SL_STATUS_OK) {
+    status = SL_STATUS_FAIL;
   }
 
-  if (supports_level) {
-    attribute_store_node_t level_node = attribute_store_create_child_if_missing(
-      endpoint_node,
-      DOTDOT_ATTRIBUTE_ID_LEVEL_CURRENT_LEVEL);
-    if (level_node == ATTRIBUTE_STORE_INVALID_NODE) {
-      return SL_STATUS_FAIL;
-    }
+  if (zigpc_attrmgmt_reconcile_capability_node(
+        endpoint_node,
+        DOTDOT_ATTRIBUTE_ID_LEVEL_CURRENT_LEVEL,
+        supports_level)
+      != SL_STATUS_OK) {
+    status = SL_STATUS_FAIL;
   }
 
-  return SL_STATUS_OK;
+  return status;
 }
