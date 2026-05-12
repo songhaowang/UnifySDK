@@ -1,5 +1,6 @@
 #include "uic_main.h"
 #include "zigpc_config.h"
+#include "datastore_fixt.h"
 #include "zigpc_datastore_fixt.h"
 #include "zigpc_config_fixt.h"
 
@@ -11,7 +12,8 @@ static uic_fixt_setup_step_t uic_fixt_setup_steps_list[]
      {NULL, "Terminator"}};
 
 static uic_fixt_shutdown_step_t uic_fixt_shutdown_steps_list[]
-  = {{NULL, "Terminator"}};
+  = {{&datastore_fixt_teardown, "Datastore"},
+     {NULL, "Terminator"}};
 
 int main(int argc, char **argv)
 {
