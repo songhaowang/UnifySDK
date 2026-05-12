@@ -3,12 +3,14 @@
 #include "datastore_fixt.h"
 #include "zigpc_datastore_fixt.h"
 #include "zigpc_config_fixt.h"
+#include "zigpc_ncp_fixt.h"
 
 #include <stdlib.h>
 
 static uic_fixt_setup_step_t uic_fixt_setup_steps_list[]
   = {{&zigpc_config_fixt_setup, "ZigPC Configuration"},
      {&zigpc_datastore_fixt_setup, "ZigPC Datastore"},
+     {&zigpc_ncp_fixt_setup, "ZigPC NCP"},
      {NULL, "Terminator"}};
 
 static uic_fixt_shutdown_step_t uic_fixt_shutdown_steps_list[]
