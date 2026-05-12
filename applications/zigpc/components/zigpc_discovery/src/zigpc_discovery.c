@@ -32,6 +32,10 @@ sl_status_t zigpc_discovery_init(void)
     return SL_STATUS_OK;
   }
 
+  if (zigpc_ncp_is_connected() == false) {
+    return SL_STATUS_NOT_AVAILABLE;
+  }
+
   if (interface->discover_network == NULL) {
     status = SL_STATUS_INVALID_STATE;
   } else {

@@ -57,6 +57,11 @@ const zigpc_ncp_interface_t *zigpc_ncp_get_interface(void)
   return zigpc_ncp_interface_registered ? &zigpc_ncp_interface : NULL;
 }
 
+bool zigpc_ncp_is_connected(void)
+{
+  return zigpc_ncp_connected;
+}
+
 sl_status_t zigpc_ncp_register_endpoint_interview_callback(
   zigpc_ncp_endpoint_interview_callback_t callback)
 {

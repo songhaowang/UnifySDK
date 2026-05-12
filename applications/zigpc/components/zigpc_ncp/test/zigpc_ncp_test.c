@@ -152,6 +152,27 @@ void test_zigpc_ncp_fixture_disconnects_on_teardown_after_connect(void)
   TEST_ASSERT_EQUAL_UINT(1, disconnect_call_count);
 }
 
+void test_zigpc_ncp_fixture_reports_connection_state(void)
+{
+  zigpc_ncp_interface_t interface = {
+    .connect = test_connect,
+    .disconnect = test_disconnect,
+  };
+
+  test_config.cpc_instance = "cpcd_0";
+
+  TEST_ASSERT_FALSE(zigpc_ncp_is_connected());
+  TEST_ASSERT_EQUAL(SL_STATUS_OK, zigpc_ncp_set_interface(&interface));
+  TEST_ASSERT_FALSE(zigpc_ncp_is_connected());
+
+  zigpc_get_config_ExpectAndReturn(&test_config);
+  TEST_ASSERT_EQUAL(SL_STATUS_OK, zigpc_ncp_fixt_setup());
+  TEST_ASSERT_TRUE(zigpc_ncp_is_connected());
+
+  TEST_ASSERT_EQUAL(0, zigpc_ncp_fixt_teardown());
+  TEST_ASSERT_FALSE(zigpc_ncp_is_connected());
+}
+
 void test_zigpc_ncp_fixture_disconnects_previous_backend_when_clearing_interface(void)
 {
   zigpc_ncp_interface_t interface = {

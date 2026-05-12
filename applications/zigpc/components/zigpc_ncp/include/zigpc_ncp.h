@@ -66,6 +66,14 @@ sl_status_t zigpc_ncp_set_interface(const zigpc_ncp_interface_t *interface);
 const zigpc_ncp_interface_t *zigpc_ncp_get_interface(void);
 
 /**
+ * @brief Check whether the active ZigPC NCP backend is connected.
+ *
+ * @return true when the backend connection completed successfully, otherwise
+ *         false.
+ */
+bool zigpc_ncp_is_connected(void);
+
+/**
  * @brief Register a callback for discovered endpoint interview results.
  *
  * Passing NULL clears the registered callback.
