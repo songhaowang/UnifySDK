@@ -148,7 +148,7 @@ void test_zigpc_discovery_init_with_registered_interface_and_not_available_backe
 
   TEST_ASSERT_EQUAL(SL_STATUS_NOT_AVAILABLE, zigpc_discovery_init());
   TEST_ASSERT_EQUAL_UINT(1, discover_network_call_count);
-  TEST_ASSERT_EQUAL_UINT(1, disconnect_call_count);
+  TEST_ASSERT_EQUAL_UINT(0, disconnect_call_count);
   TEST_ASSERT_EQUAL(SL_STATUS_NOT_AVAILABLE,
                     zigpc_ncp_notify_endpoint_interviewed("zb-0001",
                                                          3,

@@ -38,7 +38,7 @@ sl_status_t zigpc_discovery_init(void)
     status = zigpc_discovery_run_full_interview();
   }
 
-  if (status != SL_STATUS_OK) {
+  if ((status != SL_STATUS_OK) && (status != SL_STATUS_NOT_AVAILABLE)) {
     zigpc_ncp_register_endpoint_interview_callback(NULL);
     if (zigpc_ncp_fixt_teardown() != 0) {
       return SL_STATUS_FAIL;
