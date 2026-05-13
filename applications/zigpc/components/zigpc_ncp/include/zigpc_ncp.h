@@ -44,7 +44,12 @@ typedef struct {
   sl_status_t (*disconnect)(void);
   sl_status_t (*discover_network)(void);
   sl_status_t (*send_on_off)(const char *unid, uint8_t endpoint_id, bool on_off);
-  sl_status_t (*move_to_level)(const char *unid, uint8_t endpoint_id, uint8_t level);
+  sl_status_t (*move_to_level)(const char *unid,
+                               uint8_t endpoint_id,
+                               uint8_t level,
+                               uint16_t transition_time,
+                               uint8_t options_mask,
+                               uint8_t options_override);
 } zigpc_ncp_interface_t;
 
 /**

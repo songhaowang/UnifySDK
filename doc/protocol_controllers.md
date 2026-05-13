@@ -25,7 +25,7 @@ hidden:
 protocol/matter/matter_mpc.md
 ```
 - [The Matter protocol controller (Deprecated)](protocol/matter/matter_mpc.md) implements the matter protocol.
-- The Zigbee Protocol Controller (Deprecated)
+- The Zigbee protocol controller (ZigPC) is implemented in `applications/zigpc` and provides an MVP ZigBee-to-UCL bridge with discovery-backed endpoint publication and initial OnOff/Level command handling through the ZigPC NCP boundary.
 - The AoX Protocol Controller (Deprecated)
 
 Please reach out to Silicon Labs Developers Services if you need a tailored protocol controller implementation.

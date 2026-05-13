@@ -18,16 +18,17 @@ static uic_fixt_setup_step_t uic_fixt_setup_steps_list[]
      {&zigpc_datastore_fixt_setup, "ZigPC Datastore"},
      {&attribute_store_init, "Attribute store"},
      {&unify_dotdot_attribute_store_init, "Unify DotDot Attribute Store"},
+     {&zigpc_command_translator_init, "ZigPC Command Translator"},
      {&uic_mqtt_dotdot_init, "DotDot MQTT"},
      {&zigpc_attrmgmt_init, "ZigPC Attribute Management"},
      {&zigpc_discovery_setup, "ZigPC Discovery Callback"},
      {&zigpc_ncp_fixt_setup, "ZigPC NCP"},
      {&zigpc_discovery_init, "ZigPC Discovery"},
-     {&zigpc_command_translator_init, "ZigPC Command Translator"},
      {NULL, "Terminator"}};
 
 static uic_fixt_shutdown_step_t uic_fixt_shutdown_steps_list[]
-  = {{&zigpc_discovery_teardown, "ZigPC Discovery"},
+  = {{&zigpc_command_translator_teardown, "ZigPC Command Translator"},
+     {&zigpc_discovery_teardown, "ZigPC Discovery"},
      {&zigpc_ncp_fixt_teardown, "ZigPC NCP"},
      {&attribute_store_teardown, "Attribute store"},
      {&datastore_fixt_teardown, "Datastore"},

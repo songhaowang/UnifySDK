@@ -13,22 +13,69 @@
 
 #include "zigpc_command_translator.h"
 
+#include "unify_dotdot_attribute_store_helpers.h"
 #include "zigpc_ncp.h"
+
+static bool zigpc_command_translator_callbacks_registered = false;
 
 static sl_status_t zigpc_command_translator_command_supported(bool supported)
 {
   return supported ? SL_STATUS_OK : SL_STATUS_NOT_AVAILABLE;
 }
 
+static bool zigpc_command_translator_supports_on_off(dotdot_unid_t unid,
+                                                     dotdot_endpoint_id_t endpoint_id)
+{
+  return dotdot_is_supported_on_off_on_off(unid, endpoint_id);
+}
+
+static bool zigpc_command_translator_supports_move_to_level(
+  dotdot_unid_t unid, dotdot_endpoint_id_t endpoint_id)
+{
+  return dotdot_is_supported_level_current_level(unid, endpoint_id);
+}
+
+static bool zigpc_command_translator_backend_supports(bool operation_available)
+{
+  return operation_available;
+}
+
+static bool zigpc_command_translator_backend_available(bool operation_available)
+{
+  return zigpc_command_translator_backend_supports(operation_available)
+         && zigpc_ncp_is_connected();
+}
+
 sl_status_t zigpc_command_translator_init(void)
 {
+  if (zigpc_command_translator_callbacks_registered) {
+    return SL_STATUS_OK;
+  }
+
   uic_mqtt_dotdot_on_off_generated_on_callback_set(zigpc_command_translator_on);
   uic_mqtt_dotdot_on_off_generated_off_callback_set(
     zigpc_command_translator_off);
   uic_mqtt_dotdot_level_generated_move_to_level_callback_set(
     zigpc_command_translator_move_to_level);
+  zigpc_command_translator_callbacks_registered = true;
 
   return SL_STATUS_OK;
+}
+
+int zigpc_command_translator_teardown(void)
+{
+  if (zigpc_command_translator_callbacks_registered == false) {
+    return 0;
+  }
+
+  uic_mqtt_dotdot_on_off_generated_on_callback_unset(zigpc_command_translator_on);
+  uic_mqtt_dotdot_on_off_generated_off_callback_unset(
+    zigpc_command_translator_off);
+  uic_mqtt_dotdot_level_generated_move_to_level_callback_unset(
+    zigpc_command_translator_move_to_level);
+  zigpc_command_translator_callbacks_registered = false;
+
+  return 0;
 }
 
 sl_status_t zigpc_command_translator_on(
@@ -40,10 +87,15 @@ sl_status_t zigpc_command_translator_on(
 
   if (call_type == UIC_MQTT_DOTDOT_CALLBACK_TYPE_SUPPORT_CHECK) {
     return zigpc_command_translator_command_supported(
-      (interface != NULL) && (interface->send_on_off != NULL));
+      zigpc_command_translator_backend_supports(
+        (interface != NULL) && (interface->send_on_off != NULL))
+      && zigpc_command_translator_supports_on_off(unid, endpoint_id));
   }
 
-  if ((interface == NULL) || (interface->send_on_off == NULL)) {
+  if ((zigpc_command_translator_backend_available(
+         (interface != NULL) && (interface->send_on_off != NULL))
+       == false)
+      || (zigpc_command_translator_supports_on_off(unid, endpoint_id) == false)) {
     return SL_STATUS_NOT_AVAILABLE;
   }
 
@@ -59,10 +111,15 @@ sl_status_t zigpc_command_translator_off(
 
   if (call_type == UIC_MQTT_DOTDOT_CALLBACK_TYPE_SUPPORT_CHECK) {
     return zigpc_command_translator_command_supported(
-      (interface != NULL) && (interface->send_on_off != NULL));
+      zigpc_command_translator_backend_supports(
+        (interface != NULL) && (interface->send_on_off != NULL))
+      && zigpc_command_translator_supports_on_off(unid, endpoint_id));
   }
 
-  if ((interface == NULL) || (interface->send_on_off == NULL)) {
+  if ((zigpc_command_translator_backend_available(
+         (interface != NULL) && (interface->send_on_off != NULL))
+       == false)
+      || (zigpc_command_translator_supports_on_off(unid, endpoint_id) == false)) {
     return SL_STATUS_NOT_AVAILABLE;
   }
 
@@ -80,18 +137,25 @@ sl_status_t zigpc_command_translator_move_to_level(
 {
   const zigpc_ncp_interface_t *interface = zigpc_ncp_get_interface();
 
-  (void)transition_time;
-  (void)options_mask;
-  (void)options_override;
-
   if (call_type == UIC_MQTT_DOTDOT_CALLBACK_TYPE_SUPPORT_CHECK) {
     return zigpc_command_translator_command_supported(
-      (interface != NULL) && (interface->move_to_level != NULL));
+      zigpc_command_translator_backend_supports(
+        (interface != NULL) && (interface->move_to_level != NULL))
+      && zigpc_command_translator_supports_move_to_level(unid, endpoint_id));
   }
 
-  if ((interface == NULL) || (interface->move_to_level == NULL)) {
+  if ((zigpc_command_translator_backend_available(
+         (interface != NULL) && (interface->move_to_level != NULL))
+       == false)
+      || (zigpc_command_translator_supports_move_to_level(unid, endpoint_id)
+          == false)) {
     return SL_STATUS_NOT_AVAILABLE;
   }
 
-  return interface->move_to_level(unid, endpoint_id, level);
+  return interface->move_to_level(unid,
+                                  endpoint_id,
+                                  level,
+                                  transition_time,
+                                  options_mask,
+                                  options_override);
 }

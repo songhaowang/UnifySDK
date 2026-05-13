@@ -22,6 +22,7 @@ extern "C" {
 #endif
 
 sl_status_t zigpc_command_translator_init(void);
+int zigpc_command_translator_teardown(void);
 
 sl_status_t zigpc_command_translator_on(
   dotdot_unid_t unid,
