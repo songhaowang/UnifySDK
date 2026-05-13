@@ -1,0 +1,9 @@
+# ZigPC command translator library
+add_library(zigpc_command_translator src/zigpc_command_translator.c)
+target_link_libraries(zigpc_command_translator PRIVATE zigpc_ncp uic_dotdot_mqtt)
+target_include_directories(zigpc_command_translator PUBLIC include)
+
+if(BUILD_TESTING)
+  target_add_mock(zigpc_command_translator)
+  add_subdirectory(test)
+endif()

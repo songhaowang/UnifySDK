@@ -2,6 +2,7 @@
 #include "attribute_store_fixt.h"
 #include "dotdot_mqtt.h"
 #include "unify_dotdot_attribute_store.h"
+#include "zigpc_command_translator.h"
 #include "zigpc_config.h"
 #include "datastore_fixt.h"
 #include "zigpc_datastore_fixt.h"
@@ -22,6 +23,7 @@ static uic_fixt_setup_step_t uic_fixt_setup_steps_list[]
      {&zigpc_discovery_setup, "ZigPC Discovery Callback"},
      {&zigpc_ncp_fixt_setup, "ZigPC NCP"},
      {&zigpc_discovery_init, "ZigPC Discovery"},
+     {&zigpc_command_translator_init, "ZigPC Command Translator"},
      {NULL, "Terminator"}};
 
 static uic_fixt_shutdown_step_t uic_fixt_shutdown_steps_list[]
